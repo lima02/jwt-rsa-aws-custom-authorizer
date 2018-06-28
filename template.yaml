@@ -1,0 +1,56 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: "API Gateway Lambda Custom Authorizer using Auth0 RSA Tokens"
+Parameters:
+  AUDIENCE:
+    Description: "Auth0 API Name"
+    Type: String
+  TOKEN_ISSUER:
+    Type: String
+    Description: "Auth0 Tenancy Url"
+
+Resources:
+  ApiAuthorizerLambdaRole:
+    Type: "AWS::IAM::Role"
+    Properties:
+      RoleName: "guardian-api-authorizer-lambda-role"
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: "sts:AssumeRole"
+      Policies:
+        - PolicyName: "guardian-api-authorizer-lambda-exec-pol"
+          PolicyDocument:
+            Version: "2012-10-17"
+            Statement:
+              - Effect: Allow
+                Action:
+                  - "logs:CreateLogGroup"
+                  - "logs:CreateLogStream"
+                  - "logs:PutLogEvents"
+                Resource: "arn:aws:logs:*:*:*"
+
+  ApiAuthorizerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: 'guardian-api-authorizer'
+      CodeUri:
+        ./lambda
+      Description: "API Gateway Auth0 Lambda Custom Authorizer function"
+      Handler: index.handler
+      MemorySize: 128
+      Timeout: 30
+      Role:
+        !GetAtt ApiAuthorizerLambdaRole.Arn
+      Runtime: nodejs8.10
+      Variables:
+        AUDIENCE: !Ref AUDIENCE
+        TOKEN_ISSUER: !Ref TOKEN_ISSUER
+
+Outputs:
+  ApiAuthorizerFunctionArn:
+    Description: API Gateway Lambda authorizer function ARN
+    Value: !Ref ApiAuthorizerFunction

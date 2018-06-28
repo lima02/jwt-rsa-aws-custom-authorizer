@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -o errexit
+
+stack_name=guardian-api-custom-authorizer
+region="$(aws configure get region)"
+bucket_name="guardian-api-custom-authorizer-$(openssl rand -hex 8)"
+
+profile=rfs
+
+set -o xtrace
+
+aws s3 mb "s3://${bucket_name}" --region ${region} --profile ${profile}
+
+aws cloudformation package \
+  --output-template-file=deploy/output.yaml \
+  --template-file=template.yaml \
+  --s3-bucket="${bucket_name}" \
+  --profile ${profile}
+
+aws cloudformation deploy \
+  --template-file=deploy/output.yaml \
+  --stack-name="${stack_name}" \
+  --capabilities=CAPABILITY_NAMED_IAM \
+  --parameter-overrides SSMKeyId="${ssm_key_id}" \
+  --tags Project=Guardian \
+  --region ${region}  \
+  --profile ${profile}
+  
+aws s3 rb --force "s3://${bucket_name}" --profile ${profile}
+
+aws cloudformation describe-stacks \
+  --stack-name "${stack_name}" \
+  --query Stacks[].Outputs \
+  --output table \
+  --region ${region}  \
+  --profile ${profile}
