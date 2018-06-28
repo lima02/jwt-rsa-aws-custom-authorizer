@@ -8,7 +8,7 @@ module.exports.handler = async (event) => {
   }
   catch (err) {
       console.log(err);
-      return `Unauthorized: ${err.message}`;
+      throw new Error('Unauthorized'); //: ${err.message}`;
   }
   return data;
 };
