@@ -53,12 +53,7 @@ const getToken = (params) => {
     return match[1];
 }
 
-const jwtOptions = {
-    audience: process.env.AUDIENCE,
-    issuer: process.env.TOKEN_ISSUER
-};
-
-module.exports.authenticate = (params) => {
+module.exports.authenticate = (params, jwtOptions) => {
     const token = getToken(params);
 
     const decoded = jwt.decode(token, { complete: true });
@@ -70,10 +65,11 @@ module.exports.authenticate = (params) => {
         cache: true,
         rateLimit: true,
         jwksRequestsPerMinute: 10, // Default value
-        jwksUri: `${process.env.TOKEN_ISSUER}.well-known/jwks.json`
+        jwksUri: `${jwtOptions.issuer}.well-known/jwks.json`
     });
 
     const getSigningKey = util.promisify(client.getSigningKey);
+
     return getSigningKey(decoded.header.kid)
         .then((key) => {
             const signingKey = key.publicKey || key.rsaPublicKey;

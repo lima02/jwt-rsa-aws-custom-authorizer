@@ -1,4 +1,3 @@
-const nodeExternals = require('webpack-node-externals');
 const path = require('path');
 
 module.exports = {
@@ -11,5 +10,5 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   target: "node", // in order to ignore built-in modules like path, fs, etc.
-  externals: ['aws-sdk', 'lambda-local']
+  externals: ['aws-sdk', 'aws-sdk/clients/ssm']
 };

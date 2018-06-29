@@ -9,4 +9,4 @@ deploy: package
 	bin/deploy
 
 clean:
-	rm -r lambda/node_modules
+	rm -rf lambda/node_modules

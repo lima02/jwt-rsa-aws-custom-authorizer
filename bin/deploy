@@ -22,7 +22,6 @@ aws cloudformation deploy \
   --template-file=deploy/output.yaml \
   --stack-name="${stack_name}" \
   --capabilities=CAPABILITY_NAMED_IAM \
-  --parameter-overrides SSMKeyId="${ssm_key_id}" \
   --tags Project=Guardian \
   --region ${region}  \
   --profile ${profile}
